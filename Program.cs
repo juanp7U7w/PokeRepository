@@ -1,5 +1,8 @@
 using Microsoft.EntityFrameworkCore;
+using PokeApi.Config;
 using PokeApi.Models;
+using PokeApi.Services;
+using PokeApi.Services.Pokemon;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,8 +13,22 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddHttpClient<PokemonApiClient>();
+builder.Services.AddLogging();
+builder.Services.AddTransient<HttpClient>();
+builder.Services.AddHttpClient<IPokemonApiClient, PokemonApiClient>();
+
+// Registrar IHttpContextAccessor
+builder.Services.AddHttpContextAccessor();
+
+//AGREGAR EL SERVICIO
+builder.Services.AddScoped<IPokeService, PokeService>();
+
 builder.Services.AddDbContext<PokeApiContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("PokeApiDatabase")));
+
+// Configurar IOptions para UrlsConfig
+builder.Services.Configure<UrlsConfig>(builder.Configuration.GetSection("UrlsConfig"));
 
 var app = builder.Build();
 

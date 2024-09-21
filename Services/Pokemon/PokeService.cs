@@ -4,6 +4,8 @@ using Microsoft.Extensions.Options;
 using Newtonsoft.Json.Linq;
 using PokeApi.Config;
 using PokeApi.Helpers;
+using PokeApi.Models;
+using PokeApi.Repositories.Pokemon;
 using PokeApi.Response;
 using System;
 using System.Collections.Generic;
@@ -15,15 +17,18 @@ namespace PokeApi.Services.Pokemon
     public class PokeService : PokemonApiClient, IPokeService
     {
         private readonly IPokemonApiClient _pokemonApiClient;
+        private readonly IPokeRepository _pokeRepository;
 
         public PokeService(HttpClient httpClient,
             ILogger<PokemonApiClient> logger,
             IOptions<UrlsConfig> config,
             IHttpContextAccessor httpContext,
             IConfiguration configuration,
-             IPokemonApiClient pokemonApiClient) : base(httpClient, logger, config, httpContext, configuration)
+             IPokemonApiClient pokemonApiClient,
+             IPokeRepository pokeRepository) : base(httpClient, logger, config, httpContext, configuration)
         {
             _pokemonApiClient = pokemonApiClient;
+            _pokeRepository = pokeRepository;
         }
 
         public async Task<List<PokeResponse>> ObtenerPokemons(int id)
@@ -67,6 +72,43 @@ namespace PokeApi.Services.Pokemon
                         PokeName = pokemonResponse.Name,
                         PokeUrl = pokemonResponse.Sprites.FrontDefault
                     });
+                }
+
+                if (pokeResponses.Count > 0)
+                {
+
+                    var pokemonPrincipalResponse = pokeResponses.First();
+
+                    var existingPokemon = await _pokeRepository.GetPokemonByIdPokemonAsync(pokemonPrincipalResponse.Id);
+
+                    if (existingPokemon == null)
+                    {
+                        var pokemonPrincipal = new Models.Pokemon
+                        {
+                            IdPokemon = pokemonPrincipalResponse.Id,
+                            Name = pokemonPrincipalResponse.PokeName,
+                            ImaUrl = pokemonPrincipalResponse.PokeUrl
+                        };
+
+                        await _pokeRepository.AddPokemonAsync(pokemonPrincipal);
+
+                        foreach (var evolutionResponse in pokeResponses.Skip(1))
+                        {
+                            var existingEvolucion = await _pokeRepository.GetEvolucionByIdPokemonAsync(evolutionResponse.Id);
+
+                            if (existingEvolucion == null)
+                            {
+                                var evolucion = new Evolucion
+                                {
+                                    PokemonBaseId = pokemonPrincipal.Id,
+                                    EvolvesTo = evolutionResponse.PokeName,
+                                    ImaUrl = evolutionResponse.PokeUrl
+                                };
+
+                                await _pokeRepository.AddEvolucionAsync(evolucion);
+                            }
+                        }
+                    }
                 }
 
                 return pokeResponses;

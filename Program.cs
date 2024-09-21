@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using PokeApi.Config;
 using PokeApi.Models;
+using PokeApi.Repositories.Pokemon;
 using PokeApi.Services;
 using PokeApi.Services.Pokemon;
 
@@ -23,6 +24,9 @@ builder.Services.AddHttpContextAccessor();
 
 //AGREGAR EL SERVICIO
 builder.Services.AddScoped<IPokeService, PokeService>();
+
+//AGREGAR EL REPOSITORIO
+builder.Services.AddScoped<IPokeRepository, PokeRepository>();
 
 builder.Services.AddDbContext<PokeApiContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("PokeApiDatabase")));

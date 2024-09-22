@@ -1,39 +1,50 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using PokeApi.Helpers;
 using PokeApi.Models;
+using PokeApi.Request;
 using PokeApi.Response;
-using PokeApi.Services.Pokemon;
+using PokeApi.Services.Usuario;
+using System.IdentityModel.Tokens.Jwt;
 using System.Net;
+using System.Security.Claims;
+using System.Text;
 
 namespace PokeApi.Controllers
 {
-    [Authorize]
-    [Route("api")]
     [ApiController]
-    public class PokeController : ControllerBase
+    [Route("api/[controller]")]
+    public class AuthController : ControllerBase
     {
-        private readonly IPokeService _pokeService;
-        public PokeController(IPokeService pokeService)
+        private readonly IUsuarioService _usuarioService;
+
+        public AuthController(IUsuarioService usuarioService)
         {
-            _pokeService = pokeService;
+            _usuarioService = usuarioService;
         }
-        [Route("Pokemons")]
-        [HttpGet]
+
+        [HttpPost("login")]
         [ProducesResponseType((int)HttpStatusCode.Forbidden)]
         [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         [ProducesResponseType((int)HttpStatusCode.UnprocessableEntity)]
         [ProducesResponseType((int)HttpStatusCode.OK)]
-        public async Task<ActionResult<List<PokeResponse>>> GetPokemons(int id)
+        public async Task<IActionResult> Login([FromBody] UsuarioRequest request)
         {
             try
             {
-                var response = await _pokeService.ObtenerPokemons(id);
+                var response = await _usuarioService.ObtenerToken(request);
 
-                return Ok(response);
+                if (response!="")
+                {
+                    return Ok(response);
+                }
+                else
+                {
+                    return Unauthorized();
+                }
+
             }
             catch (ValidacionException ex)
             {
@@ -49,6 +60,9 @@ namespace PokeApi.Controllers
             {
                 return UnprocessableEntity(new { error = true, msg = "Error desconocido" });
             }
+
         }
+       
     }
+
 }

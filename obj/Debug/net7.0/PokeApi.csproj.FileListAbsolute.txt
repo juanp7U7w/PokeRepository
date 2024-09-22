@@ -75,3 +75,5 @@ C:\Users\brein\source\repos\PokeApi\obj\Debug\net7.0\refint\PokeApi.dll
 C:\Users\brein\source\repos\PokeApi\obj\Debug\net7.0\PokeApi.pdb
 C:\Users\brein\source\repos\PokeApi\obj\Debug\net7.0\PokeApi.genruntimeconfig.cache
 C:\Users\brein\source\repos\PokeApi\obj\Debug\net7.0\ref\PokeApi.dll
+C:\Users\brein\source\repos\PokeApi\bin\Debug\net7.0\BCrypt.Net-Next.dll
+C:\Users\brein\source\repos\PokeApi\bin\Debug\net7.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll

@@ -24,7 +24,7 @@ public partial class PokeApiContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<ErrorLog>()
-            .HasKey(e => e.LogId);  // Define LogId como clave primaria
+            .HasKey(e => e.LogId); 
 
         modelBuilder.Entity<Evolucion>()
             .HasOne(e => e.PokemonBase)
